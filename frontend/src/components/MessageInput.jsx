@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
-import { Image, Send, X } from "lucide-react";
+import { Image, Send, X, Mic, Smile } from "lucide-react"; // Import Smile for emoji
+import EmojiPicker from "emoji-picker-react"; // Import emoji picker component
 import toast from "react-hot-toast";
 import axios from "axios";
 
@@ -8,9 +9,15 @@ const MessageInput = () => {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
   const [voiceNote, setVoiceNote] = useState(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false); // Emoji picker state
   const fileInputRef = useRef(null);
   const voiceNoteInputRef = useRef(null);
   const { sendMessage } = useChatStore();
+
+  // Handle emoji selection
+  const handleEmojiSelect = (emojiObject) => {
+    setText((prev) => prev + emojiObject.emoji);
+  };
 
   // Handle image upload
   const handleImageChange = (e) => {
@@ -35,8 +42,8 @@ const MessageInput = () => {
   // Handle message submission
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!text.trim() && !imagePreview) {
-      toast.error("Please add text or an image.");
+    if (!text.trim() && !imagePreview && !voiceNote) {
+      toast.error("Please add text, an image, or a voice note.");
       return;
     }
 
@@ -44,12 +51,16 @@ const MessageInput = () => {
       await sendMessage({
         text: text.trim(),
         image: imagePreview,
+        voiceNote,
       });
 
       // Clear input fields
       setText("");
       setImagePreview(null);
+      setVoiceNote(null);
+      setShowEmojiPicker(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (voiceNoteInputRef.current) voiceNoteInputRef.current.value = "";
     } catch (error) {
       console.error("Failed to send message:", error);
       toast.error("Failed to send message. Please try again.");
@@ -74,6 +85,11 @@ const MessageInput = () => {
     setVoiceNote(file);
   };
 
+  const removeVoiceNote = () => {
+    setVoiceNote(null);
+    if (voiceNoteInputRef.current) voiceNoteInputRef.current.value = "";
+  };
+
   const sendVoiceNote = async () => {
     if (!voiceNote) {
       toast.error("No voice note selected.");
@@ -89,7 +105,7 @@ const MessageInput = () => {
       });
 
       toast.success("Voice note sent successfully!");
-      setVoiceNote(null); // Reset voice note
+      setVoiceNote(null);
       if (voiceNoteInputRef.current) voiceNoteInputRef.current.value = "";
     } catch (error) {
       console.error("Error sending voice note:", error);
@@ -98,7 +114,7 @@ const MessageInput = () => {
   };
 
   return (
-    <div className="p-4 w-full">
+    <div className="p-4 w-full relative">
       {/* Image Preview */}
       {imagePreview && (
         <div className="mb-3 flex items-center gap-2">
@@ -122,14 +138,24 @@ const MessageInput = () => {
 
       {/* Main Form */}
       <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-        <div className="flex-1 flex gap-2">
-          <input
-            type="text"
-            className="w-full input input-bordered rounded-lg input-sm sm:input-md"
-            placeholder="Type a message..."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
+        <div className="flex-1 flex gap-2 items-center relative">
+          {/* Emoji Picker */}
+          <div className="relative">
+            <button
+              type="button"
+              className="btn btn-circle p-0 text-zinc-400"
+              onClick={() => setShowEmojiPicker((prev) => !prev)}
+            >
+              <Smile size={24} />
+            </button>
+            {showEmojiPicker && (
+              <div className="absolute bottom-12 left-0 z-10 bg-white shadow-md rounded-lg p-2">
+                <EmojiPicker onEmojiClick={handleEmojiSelect} />
+              </div>
+            )}
+          </div>
+
+          {/* Image Icon */}
           <input
             type="file"
             accept="image/*"
@@ -137,52 +163,69 @@ const MessageInput = () => {
             ref={fileInputRef}
             onChange={handleImageChange}
           />
-
           <button
             type="button"
-            className="hidden sm:flex btn btn-circle text-zinc-400"
+            className="btn btn-circle p-0 text-zinc-400"
             onClick={() => fileInputRef.current?.click()}
           >
-            <Image size={20} />
+            <Image size={24} />
           </button>
+
+          {/* Mic Icon for Voice Note */}
+          <input
+            type="file"
+            accept="audio/*"
+            ref={voiceNoteInputRef}
+            onChange={handleVoiceNoteUpload}
+            className="hidden"
+            id="voiceNoteInput"
+          />
+          <label
+            htmlFor="voiceNoteInput"
+            className="cursor-pointer btn btn-circle p-0 text-zinc-400"
+          >
+            <Mic size={24} />
+          </label>
+
+          {/* Text Input */}
+          <input
+            type="text"
+            className="w-full input input-bordered rounded-lg input-sm sm:input-md"
+            placeholder="Type a message..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
         </div>
+
+        {/* Send Button */}
         <button
           type="submit"
           className="btn btn-sm btn-circle"
-          disabled={!text.trim() && !imagePreview}
+          disabled={!text.trim() && !imagePreview && !voiceNote}
         >
-          <Send size={22} />
+          <Send size={24} />
         </button>
       </form>
 
-      {/* Voice Note Upload */}
-      <div className="mt-4 flex items-center space-x-4">
-        <input
-          type="file"
-          accept="audio/*"
-          ref={voiceNoteInputRef}
-          onChange={handleVoiceNoteUpload}
-          className="hidden"
-          id="voiceNoteInput"
-        />
-        <label
-          htmlFor="voiceNoteInput"
-          className="cursor-pointer text-blue-500 underline"
-        >
-          🎙️ Upload Voice Note
-        </label>
-        {voiceNote && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm">{voiceNote.name}</span>
-            <button
-              onClick={sendVoiceNote}
-              className="btn btn-primary btn-sm"
-            >
-              Send Voice Note
-            </button>
-          </div>
-        )}
-      </div>
+      {/* Voice Note Upload and Remove Button */}
+      {voiceNote && (
+        <div className="mt-4 flex items-center gap-2">
+          <span className="text-sm">{voiceNote.name}</span>
+          <button
+            onClick={removeVoiceNote}
+            className="btn btn-circle p-0 text-red-500"
+            type="button"
+          >
+            <X className="size-3" />
+          </button>
+          <button
+            onClick={sendVoiceNote}
+            className="btn btn-primary btn-sm"
+          >
+            Send Voice Note
+          </button>
+        </div>
+      )}
     </div>
   );
 };

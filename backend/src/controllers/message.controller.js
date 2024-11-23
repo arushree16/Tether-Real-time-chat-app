@@ -5,7 +5,7 @@ import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
 
 export const getUsersForSidebar = async (req, res) => {
-    try {
+  try {
     const loggedInUserId = req.user._id;
     const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
     res.status(200).json(filteredUsers);
@@ -43,7 +43,9 @@ export const sendMessage = async (req, res) => {
     let imageUrl;
     if (image) {
       // Upload base64 image to cloudinary
-      const uploadResponse = await cloudinary.uploader.upload(image);
+      const uploadResponse = await cloudinary.uploader.upload(image, {
+        folder: "chat_images", // Optional: specify a folder in Cloudinary
+      });
       imageUrl = uploadResponse.secure_url;
     }
 
@@ -56,6 +58,7 @@ export const sendMessage = async (req, res) => {
 
     await newMessage.save();
 
+    // Use the correct function to get the receiver's socket ID
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", newMessage);

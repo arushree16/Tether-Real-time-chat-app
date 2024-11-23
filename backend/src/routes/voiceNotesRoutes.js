@@ -7,9 +7,9 @@ const router = express.Router();
 
 // Cloudinary configuration
 cloudinary.config({
-  cloud_name: "your-cloud-name", // Replace with your Cloudinary cloud name
-  api_key: "your-api-key", // Replace with your Cloudinary API key
-  api_secret: "your-api-secret", // Replace with your Cloudinary API secret
+  cloud_name: "dvhv6ktrf", 
+  api_key: "45854811975752", 
+  api_secret: "YPwOn3c0MHSKNUaPyzcKA11gIng", 
 });
 
 // Endpoint for uploading voice note

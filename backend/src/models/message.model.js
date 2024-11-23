@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 const messageSchema = new mongoose.Schema(
   {
     senderId: {
@@ -10,7 +9,10 @@ const messageSchema = new mongoose.Schema(
     receiverId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+    },
+    groupId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Group",
     },
     text: {
       type: String,
@@ -18,7 +20,9 @@ const messageSchema = new mongoose.Schema(
     image: {
       type: String,
     },
-    voiceNote: { type: String },
+    voiceNote: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

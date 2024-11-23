@@ -10,15 +10,24 @@ const HomePage = () => {
   return (
     <div className="h-screen bg-base-200">
       <div className="flex items-center justify-center pt-20 px-4">
-        <div className="bg-base-100 rounded-lg shadow-cl w-full max-w-6xl h-[calc(100vh-8rem)]">
+        {/* Card container */}
+        <div className="card w-full max-w-6xl bg-base-100 shadow-lg h-[calc(100vh-8rem)]">
+          {/* Inner layout */}
           <div className="flex h-full rounded-lg overflow-hidden">
+            {/* Sidebar */}
             <Sidebar />
 
-            {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
+            {/* Conditional rendering */}
+            {!selectedUser ? (
+              <NoChatSelected />
+            ) : (
+              <ChatContainer />
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 };
+
 export default HomePage;

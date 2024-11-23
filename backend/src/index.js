@@ -8,7 +8,9 @@ import { connectDB } from "./lib/db.js";
 
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
-import voiceNotesRoutes from "./routes/voiceNotesRoutes.js"; // Import the voice note routes
+import voiceNotesRoutes from "./routes/voiceNotesRoutes.js";
+import groupRoutes from "./routes/group.route.js"; // Group routes
+
 import { app, server } from "./lib/socket.js";
 
 dotenv.config();
@@ -27,16 +29,14 @@ app.use(
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
-
-// Use the voice notes route
-app.use("/api/voiceNotes", voiceNotesRoutes); // The upload endpoint is now accessible via `/api/voiceNotes/uploadVoiceNote`
+app.use('/api/groups', groupRoutes); // Group routes
+app.use("/api/voiceNotes", voiceNotesRoutes); // Voice Notes routes
 
 // Serve static files for uploads
 app.use("/uploads", express.static("uploads"));
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
-
   app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
   });

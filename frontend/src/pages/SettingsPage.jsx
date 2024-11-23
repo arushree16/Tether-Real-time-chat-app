@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { THEMES } from "../constants";
 import { useThemeStore } from "../store/useThemeStore";
 import { Send } from "lucide-react";
+import toast from "react-hot-toast";
+import { useAuthStore } from "../store/useAuthStore"; // Assuming useAuthStore is where the user's data is stored
 
 const PREVIEW_MESSAGES = [
   { id: 1, content: "Hey! How's it going?", isSent: false },
@@ -9,10 +12,84 @@ const PREVIEW_MESSAGES = [
 
 const SettingsPage = () => {
   const { theme, setTheme } = useThemeStore();
+  const { user, UpdateProfilePicture } = useAuthStore(); // Assuming user is managed here
+  const [imagePreview, setImagePreview] = useState(null);
+  const [profileImage, setProfileImage] = useState(user?.profilePicture || null);
+
+  // Handle image change
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Create a preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    } else {
+      toast.error("Please select a valid image.");
+    }
+  };
+
+  // Handle updating profile picture
+  const handleUpdateProfilePicture = () => {
+    if (imagePreview) {
+      // Call the update function from the store
+      UpdateProfilePicture(imagePreview);
+      setProfileImage(imagePreview);
+      toast.success("Profile picture updated!");
+    } else {
+      toast.error("Please select an image first.");
+    }
+  };
 
   return (
     <div className="h-screen container mx-auto px-4 pt-20 max-w-5xl">
       <div className="space-y-6">
+        {/* Profile Picture Section */}
+        <div className="flex flex-col gap-1">
+          <h2 className="text-lg font-semibold">Profile Picture</h2>
+          <p className="text-sm text-base-content/70">Change your profile picture</p>
+
+          {/* Displaying Current Profile Picture */}
+          <div className="flex items-center gap-4">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary">
+              <img
+                src={profileImage || "/default-avatar.png"} // Use default if no profile image is set
+                alt="Profile"
+                className="object-cover w-full h-full"
+              />
+            </div>
+            {/* Image Upload */}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="file-input file-input-bordered"
+            />
+          </div>
+        </div>
+
+        {/* Image Preview */}
+        {imagePreview && (
+          <div className="mt-4">
+            <h3 className="text-lg font-semibold">Preview</h3>
+            <div className="flex items-center gap-4">
+              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary">
+                <img
+                  src={imagePreview}
+                  alt="Image Preview"
+                  className="object-cover w-full h-full"
+                />
+              </div>
+              <button
+                onClick={handleUpdateProfilePicture}
+                className="btn btn-primary"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Theme Section */}
         <div className="flex flex-col gap-1">
           <h2 className="text-lg font-semibold">Theme</h2>
           <p className="text-sm text-base-content/70">Choose a theme for your chat interface</p>
@@ -113,4 +190,5 @@ const SettingsPage = () => {
     </div>
   );
 };
+
 export default SettingsPage;
