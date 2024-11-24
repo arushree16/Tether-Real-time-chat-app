@@ -2,6 +2,8 @@
 
 Tether is a real-time chat application enabling seamless communication through features like group chats, image sharing, and voice note functionality. It's the perfect platform for instant and engaging conversations.  
 
+https://tether-real-time-chat-app-2.onrender.com
+
 ---
 
 ## Features  
