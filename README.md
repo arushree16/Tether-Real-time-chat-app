@@ -46,7 +46,7 @@ Tether is a real-time chat application enabling seamless communication through f
    ```  
 
 #### 3. Install Dependencies  
-```bash  
+  ```bash  
    npm install  
    ``` 
 
